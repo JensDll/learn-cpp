@@ -1,9 +1,3 @@
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 
-// Demonstrate some basic assertions.
-TEST(HelloTest, BasicAssertions) {
-  // Expect two strings not to be equal.
-  EXPECT_STRNE("hello", "world");
-  // Expect equality.
-  EXPECT_EQ(7 * 6, 42);
-}
+TEST_CASE("Factorials are computed", "[factorial]") { REQUIRE(1 == 1); }

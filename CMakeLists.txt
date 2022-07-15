@@ -1,55 +1,84 @@
 cmake_minimum_required(VERSION 3.23)
-project(LearnCPP VERSION 0.0.0)
 
-option(BUILD_TESTING "Build all tests." OFF)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+project(
+  LearnCPP
+  VERSION 0.0.0
+  LANGUAGES C CXX)
 
 include(FetchContent)
+include(CMakePrintHelpers)
 
-if(BUILD_TESTING)
-  FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        4556086674e4dfae2aa5f042d9e7844fc5ef9b89
-  )
+include(cmake/StandardProjectSettings.cmake)
+include(cmake/PreventInSourceBuilds.cmake)
 
-  FetchContent_MakeAvailable(googletest)
+# Link this library to set the c++ standard / compile-time options requested
+add_library(project_options INTERFACE)
 
-  enable_testing()
+if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+  option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
 
-  message(STATUS "Building tests")
+  if(ENABLE_BUILD_WITH_TIME_TRACE)
+    target_compile_options(project_options INTERFACE -ftime-trace)
+  endif()
 endif()
+
+# Link this library to use the warnings specified in Warnings.cmake
+add_library(project_warnings INTERFACE)
+
+# Enable cache system
+include(cmake/Cache.cmake)
+
+# Configure linker options
+include(cmake/Linker.cmake)
+configure_linker(project_options)
+
+# Configure sanitizer options if supported by compiler
+include(cmake/Sanitizers.cmake)
+configure_sanitizers(project_options)
+
+# Configure compiler warnings
+include(cmake/Warnings.cmake)
+configure_warnings(project_warnings)
+
+# Enable doxygen
+include(cmake/Doxygen.cmake)
+enable_doxygen()
+
+# Allow for static analysis options
+include(cmake/StaticAnalyzers.cmake)
+
+option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
+option(ENABLE_TESTING "Enable Test Builds" ON)
+option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
+
+# Very basic PCH example
+option(ENABLE_PCH "Enable Precompiled Headers" OFF)
+if(ENABLE_PCH)
+  target_precompile_headers(
+    project_options
+    INTERFACE
+    <vector>
+    <string>
+    <map>
+    <utility>)
+endif()
+
+option(ENABLE_CONAN "Use Conan for dependency management" OFF)
+if(ENABLE_CONAN)
+  include(cmake/Conan.cmake)
+  run_conan()
+endif()
+
+if(ENABLE_TESTING)
+  enable_testing()
+  message("Building tests")
+  add_subdirectory(lib/Catch2)
+endif()
+
+# if(ENABLE_FUZZING)
+#   message("Building Fuzz Tests, using fuzzing sanitizer https://www.llvm.org/docs/LibFuzzer.html")
+#   add_subdirectory(fuzz_test)
+# endif()
 
 add_subdirectory(modules/data_structures)
 add_subdirectory(modules/main)
-
-# if(BUILD_TESTING)
-#   FetchContent_Declare(
-#     googletest
-#     GIT_REPOSITORY https://github.com/google/googletest.git
-#     GIT_TAG        4556086674e4dfae2aa5f042d9e7844fc5ef9b89
-#   )
-
-#   FetchContent_MakeAvailable(googletest)
-
-#   enable_testing()
-
-#   message(STATUS "Building tests")
-
-#   add_executable(
-#     foo_test
-#     foo_test.cpp
-#   )
-
-#   target_link_libraries(
-#     foo_test
-#     GTest::gtest_main
-#   )
-
-#   include(GoogleTest)
-#   gtest_discover_tests(foo_test)
-# endif()

@@ -5,21 +5,23 @@
 #include <list>
 #include <vector>
 
-int main(int argc, char const* argv[]) {
-  ds::LinkedList<int> list{};
-  list.AddBack(1);
-  list.AddBack(2);
-  list.AddBack(3);
-  list.AddBack(4);
-  list.AddBack(5);
+int main() {
+  ds::LinkedList<std::string> list{};
+  list.AddBack("one");
+  list.AddBack("two");
+  list.AddBack("three");
+  list.AddBack("four");
+  list.AddBack("five");
 
-  std::cout << "Linked list iterator" << std::endl;
+  std::cout << list << " iterator" << std::endl;
 
   for (auto begin{ list.begin() }; begin != list.end(); begin++) {
     std::cout << *begin << std::endl;
   }
 
-  for (auto x : list) {
+  std::cout << list << " for-each loop" << std::endl;
+
+  for (const auto& x : list) {
     std::cout << x << std::endl;
   }
 
