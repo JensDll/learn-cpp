@@ -7,7 +7,8 @@ set(USER_LINKER_OPTION
     CACHE STRING "Linker to be used")
 
 set(USER_LINKER_OPTION_VALUES "lld" "gold" "bfd")
-set_property(CACHE USER_LINKER_OPTION PROPERTY STRINGS ${USER_LINKER_OPTION_VALUES})
+set_property(CACHE USER_LINKER_OPTION PROPERTY STRINGS
+                                               ${USER_LINKER_OPTION_VALUES})
 
 list(
   FIND
@@ -17,8 +18,8 @@ list(
 
 if(${USER_LINKER_OPTION_INDEX} EQUAL -1)
   message(
-    STATUS "Using custom linker: '${USER_LINKER_OPTION}', explicitly supported entries are ${USER_LINKER_OPTION_VALUES}"
-  )
+    STATUS "Using custom linker: '${USER_LINKER_OPTION}', "
+           "explicitly supported entries are ${USER_LINKER_OPTION_VALUES}")
 endif()
 
 function(configure_linker project_name)

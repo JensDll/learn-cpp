@@ -21,7 +21,9 @@ list(
 if(${CACHE_OPTION_INDEX} EQUAL -1)
   message(
     WARNING
-      "Using custom compiler cache system: '${CACHE_OPTION}', explicitly supported entries are ${CACHE_OPTION_VALUES}")
+      "Using custom compiler cache system: "
+      "'${CACHE_OPTION}', explicitly supported entries are ${CACHE_OPTION_VALUES}"
+  )
 endif()
 
 find_program(CACHE_BINARY ${CACHE_OPTION})

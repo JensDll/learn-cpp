@@ -1,3 +1,9 @@
+if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+  set(isClangCompiler ON)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(isGnuCompiler ON)
+endif()
+
 get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
 if(isMultiConfig)
@@ -14,7 +20,8 @@ else()
 
   # Set a default build type if none was specified
   if(NOT CMAKE_BUILD_TYPE)
-    message(STATUS "Setting build type to 'RelWithDebInfo' as none was specified")
+    message(
+      STATUS "Setting build type to 'RelWithDebInfo' as none was specified")
     set(CMAKE_BUILD_TYPE
         RelWithDebInfo
         CACHE STRING "Choose the type of build" FORCE)
@@ -27,17 +34,25 @@ else()
   endif()
 endif()
 
+# Require C++20 and disable extensions for all targets
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # Treat C++20 as a minimum requirement
+set(CMAKE_CXX_EXTENSIONS OFF)
 # Generate compile_commands.json to make it easier to work with clang based tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Make sure that link libaries are valid targets
 # Professional CMake: A Practical Guide 12th Edition, p. 161
 set(CMAKE_LINK_LIBRARIES_ONLY_TARGETS ON)
 
-option(ENABLE_IPO "Enable Interprocedural Optimization, aka Link Time Optimization (LTO)" OFF)
+option(ENABLE_IPO
+       "Enable Interprocedural Optimization, aka Link Time Optimization (LTO)"
+       OFF)
 
 if(ENABLE_IPO)
   include(CheckIPOSupported)
+
   check_ipo_supported(RESULT isSupported OUTPUT output)
+
   if(isSupported)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
   else()
@@ -45,10 +60,21 @@ if(ENABLE_IPO)
   endif()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+if(isClangCompiler)
   add_compile_options(-fcolor-diagnostics)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+
+  option(ENABLE_BUILD_WITH_TIME_TRACE
+         "Enable -ftime-trace to generate time tracing .json files on clang"
+         OFF)
+
+  if(ENABLE_BUILD_WITH_TIME_TRACE)
+    target_compile_options(project_options INTERFACE -ftime-trace)
+  endif()
+elseif(isGnuCompiler)
   add_compile_options(-fdiagnostics-color=always)
 else()
-  message(STATUS "No colored compiler diagnostic set for '${CMAKE_CXX_COMPILER_ID}' compiler")
+  message(
+    STATUS
+      "No colored compiler diagnostic set for '${CMAKE_CXX_COMPILER_ID}' compiler"
+  )
 endif()
