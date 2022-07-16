@@ -1,4 +1,6 @@
 #include "data_structures.hpp"
+#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 #include <cassert>
 #include <iostream>
@@ -6,6 +8,9 @@
 #include <vector>
 
 int main() {
+  fmt::print("Welcome to fmt!\n");
+  spdlog::info("Welcome to spdlog!");
+
   ds::LinkedList<std::string> list{};
   list.AddBack("one");
   list.AddBack("two");
