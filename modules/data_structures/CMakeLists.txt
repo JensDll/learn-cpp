@@ -14,5 +14,5 @@ if(ENABLE_TESTING)
             learn_cpp_data_structures
             Catch2::Catch2WithMain)
 
-  catch_discover_tests(learn_cpp_data_structures_tests TEST_PREFIX "unittests.")
+  catch_discover_tests(learn_cpp_data_structures_tests)
 endif()

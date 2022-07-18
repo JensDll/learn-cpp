@@ -1,112 +1,221 @@
-#include <iostream>
-
 #ifndef LEARN_CPP_DATA_STRUCTURES_LINKED_LIST_HPP
 #define LEARN_CPP_DATA_STRUCTURES_LINKED_LIST_HPP
+
+#include <iostream>
+
 namespace ds {
 
 template <typename T>
-class LinkedList {
+class linked_list {
  private:
-  class Node;
-  class Iterator;
+  class node;
+  class iterator;
 
  public:
-  constexpr int count() const { return m_count; };
+  linked_list() = default;
+  linked_list(std::initializer_list<T> values);
+  linked_list(const linked_list<T>& list);
+  linked_list(const linked_list<T>&& list) noexcept;
+  ~linked_list();
 
-  Node& AddFront(T value);
-  Node& AddBack(T value);
+  [[nodiscard]] constexpr int size() const;
 
-  Iterator begin() { return Iterator{ m_front }; };
-  Iterator end() { return Iterator{ nullptr }; };
+  node& add_front(T value);
+  node& add_back(T value);
+
+  iterator begin();
+  iterator end();
+
+  linked_list& operator=(const linked_list& list);
+  linked_list& operator=(linked_list&& list) noexcept;
+  linked_list& operator=(std::initializer_list<T> values);
 
  private:
-  int m_count{ 0 };
-  Node* m_front{ nullptr };
-  Node* m_back{ nullptr };
+  int m_size_{ 0 };
+  node* m_front_{ nullptr };
+  node* m_back_{ nullptr };
 
-  class Node {
+  class node {
    public:
-    Node(T value);
+    explicit node(T value);
 
-    T value;
-    Node* next{ nullptr };
-    Node* prev{ nullptr };
+    T m_value;
+    node* m_next{ nullptr };
+    node* m_prev{ nullptr };
   };
 
-  class Iterator {
+  class iterator {
    public:
-    Iterator(Node* a_node) : m_node{ a_node } {}
+    using value_type = T;
+    using pointer_type = node*;
+    using reference_type = value_type&;
 
-    Iterator& operator++() {
-      m_node = m_node->next;
-      return *this;
-    }
+    explicit iterator(pointer_type ptr);
 
-    Iterator& operator++(int) {
-      m_node = m_node->next;
-      return *this;
-    }
-
-    T operator*() { return m_node->value; }
-
-    bool operator==(const Iterator& other) const {
-      return m_node == other.m_node;
-    }
-
-    bool operator!=(const Iterator& other) const {
-      return m_node != other.m_node;
-    }
+    iterator& operator++();
+    iterator& operator++(int);
+    iterator& operator--();
+    iterator& operator--(int);
+    reference_type operator*();
+    bool operator==(const iterator& other) const;
+    bool operator!=(const iterator& other) const;
 
    private:
-    Node* m_node;
+    pointer_type m_ptr_;
   };
 };
 
-template <typename T>
-LinkedList<T>::Node::Node(T a_value) : value{ a_value } {}
-
-template <typename T>
-typename LinkedList<T>::Node& LinkedList<T>::AddFront(T a_value) {
-  Node* node{ new Node{ a_value } };
-
-  if (m_count == 0) {
-    m_front = node;
-    m_back = node;
-  } else {
-    node->next = m_front;
-    m_front->prev = node;
-    m_front = node;
-  }
-
-  ++m_count;
-
-  return *node;
-}
-
-template <typename T>
-typename LinkedList<T>::Node& LinkedList<T>::AddBack(T a_value) {
-  Node* node{ new Node{ a_value } };
-
-  if (m_count == 0) {
-    m_front = node;
-    m_back = node;
-  } else {
-    node->prev = m_back;
-    m_back->next = node;
-    m_back = node;
-  }
-
-  ++m_count;
-
-  return *node;
-}
-
-template <typename T>
-std::ostream& operator<<(std::ostream& out, const LinkedList<T>& a_list) {
-  out << "LinkedList(" << a_list.count() << ")";
-  return out;
-}
-
 }  // namespace ds
+
+// ####################### Constructors #######################
+
+template <typename T>
+ds::linked_list<T>::linked_list(std::initializer_list<T> values) {
+  std::cout << "linked_list initializer list constructor" << std::endl;
+}
+
+template <typename T>
+ds::linked_list<T>::linked_list(const ds::linked_list<T>& list) {
+  std::cout << "linked_list copy constructor" << std::endl;
+}
+
+template <typename T>
+ds::linked_list<T>::linked_list(const ds::linked_list<T>&& list) noexcept {
+  std::cout << "linked_list move constructor" << std::endl;
+}
+
+template <typename T>
+ds::linked_list<T>::~linked_list() {
+  std::cout << "linked_list destructor" << std::endl;
+}
+
+template <typename T>
+ds::linked_list<T>::node::node(T value) : m_value{ value } {}
+
+template <typename T>
+ds::linked_list<T>::iterator::iterator(pointer_type ptr) : m_ptr_{ ptr } {}
+
+// ####################### Methods #######################
+
+template <typename T>
+constexpr int ds::linked_list<T>::size() const {
+  return m_size_;
+}
+
+template <typename T>
+typename ds::linked_list<T>::iterator ds::linked_list<T>::begin() {
+  return iterator{ m_front_ };
+}
+
+template <typename T>
+typename ds::linked_list<T>::iterator ds::linked_list<T>::end() {
+  return iterator{ m_back_ };
+}
+
+template <typename T>
+typename ds::linked_list<T>::node& ds::linked_list<T>::add_front(T value) {
+  node* new_node{ new node{ value } };
+
+  if (m_size_ == 0) {
+    m_front_ = new_node;
+    m_back_ = new_node;
+  } else {
+    new_node->m_next = m_front_;
+    m_front_->m_prev = new_node;
+    m_front_ = new_node;
+  }
+
+  ++m_size_;
+
+  return *new_node;
+}
+
+template <typename T>
+typename ds::linked_list<T>::node& ds::linked_list<T>::add_back(T value) {
+  node* new_node{ new node{ value } };
+
+  if (m_size_ == 0) {
+    m_front_ = new_node;
+    m_back_ = new_node;
+  } else {
+    new_node->m_prev = m_back_;
+    m_back_->m_next = new_node;
+    m_back_ = new_node;
+  }
+
+  ++m_size_;
+
+  return *new_node;
+}
+
+// ####################### Operators #######################
+
+template <typename T>
+ds::linked_list<T>& ds::linked_list<T>::operator=(const linked_list& list) {
+  std::cout << "linked_list copy assignment operator" << std::endl;
+
+  return *this;
+}
+
+template <typename T>
+ds::linked_list<T>& ds::linked_list<T>::operator=(linked_list&& list) noexcept {
+  std::cout << "linked_list move assignment operator" << std::endl;
+
+  return *this;
+}
+
+template <typename T>
+ds::linked_list<T>& ds::linked_list<T>::operator=(
+    std::initializer_list<T> values) {
+  std::cout << "linked_list initializer list assignment operator" << std::endl;
+
+  return *this;
+}
+
+template <typename T>
+typename ds::linked_list<T>::iterator&
+ds::linked_list<T>::iterator::operator++() {
+  m_ptr_ = m_ptr_->m_next;
+  return *this;
+}
+
+template <typename T>
+typename ds::linked_list<T>::iterator& ds::linked_list<T>::iterator::operator++(
+    int) {
+  iterator iter{ *this };
+  ++(*this);
+  return iter;
+}
+
+template <typename T>
+typename ds::linked_list<T>::iterator&
+ds::linked_list<T>::iterator::operator--() {
+  m_ptr_ = m_ptr_->m_prev;
+  return *this;
+}
+
+template <typename T>
+typename ds::linked_list<T>::iterator& ds::linked_list<T>::iterator::operator--(
+    int) {
+  iterator iter{ *this };
+  --(*this);
+  return iter;
+}
+
+template <typename T>
+typename ds::linked_list<T>::iterator::reference_type
+ds::linked_list<T>::iterator::operator*() {
+  return m_ptr_->m_value;
+}
+
+template <typename T>
+bool ds::linked_list<T>::iterator::operator==(const iterator& other) const {
+  return m_ptr_ == other.m_ptr_;
+}
+
+template <typename T>
+bool ds::linked_list<T>::iterator::operator!=(const iterator& other) const {
+  return m_ptr_ != other.m_ptr_;
+}
 
 #endif

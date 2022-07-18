@@ -74,6 +74,14 @@
     "thread": "cpp",
     "variant": "cpp",
     "cassert": "cpp",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "charconv": "cpp",
+    "bitset": "cpp",
+    "codecvt": "cpp",
+    "complex": "cpp",
+    "regex": "cpp",
+    "future": "cpp",
+    "span": "cpp",
+    "typeindex": "cpp"
   }
 }
