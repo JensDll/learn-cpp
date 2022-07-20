@@ -93,6 +93,6 @@ function(configure_warnings projectName)
 
   target_compile_options(${projectName} INTERFACE ${projectWarnings})
 
-  message(VERBOSE "Using the following compiler warnings:\n${projectWarnings}")
+  message(STATUS "Using the following compiler warnings:\n${projectWarnings}")
 
 endfunction()
