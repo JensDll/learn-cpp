@@ -5,6 +5,7 @@
     "source.fixAll": true
   },
   "files.insertFinalNewline": true,
+  "cmake.useCMakePresets": "always",
   "C_Cpp.errorSquiggles": "Enabled",
   "files.associations": {
     "*.xml": "html",

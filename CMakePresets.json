@@ -1,88 +1,144 @@
-﻿{
-  "version": 3,
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
   "configurePresets": [
     {
-      "name": "linux-debug",
-      "displayName": "Linux Debug",
-      "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      },
-      "vendor": { "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" } }
-    },
-    {
-      "name": "macos-debug",
-      "displayName": "macOS Debug",
-      "description": "Target a remote macOS system.",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Darwin"
-      },
-      "vendor": { "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" } }
-    },
-    {
-      "name": "windows-base",
-      "description": "Target Windows with the Visual Studio development environment.",
+      "name": "conf-base",
+      "description": "General settings that apply to all configurations.",
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl.exe",
-        "CMAKE_CXX_COMPILER": "cl.exe"
-      },
+      "installDir": "${sourceDir}/out/install/${presetName}"
+    },
+    {
+      "name": "conf-windows-base",
+      "description": "Windows base for MSBuild toolchains that apply to msvc and clang.",
+      "hidden": true,
+      "inherits": "conf-base",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      },
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "ENABLE_CPPCHECK_DEFAULT": "FALSE",
+        "ENABLE_CLANG_TIDY_DEFAULT": "FALSE"
+      }
+    },
+    {
+      "name": "conf-unixlike-base",
+      "description": "Unix-like OS settings for gcc and clang toolchains.",
+      "hidden": true,
+      "inherits": "conf-base",
+      "condition": {
+        "type": "inList",
+        "string": "${hostSystemName}",
+        "list": ["Linux", "Darwin"]
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
+        }
+      }
+    },
+    {
+      "name": "gcc-debug",
+      "displayName": "gcc Debug",
+      "description": "Target Unix-like OS with the gcc compiler. (Debug)",
+      "inherits": "conf-unixlike-base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "gcc-release",
+      "displayName": "gcc Release",
+      "description": "Target Unix-like OS with the gcc compiler. (RelWithDebInfo)",
+      "inherits": "conf-unixlike-base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
     {
       "name": "x64-debug",
       "displayName": "x64 Debug",
       "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
-      "inherits": "windows-base",
+      "inherits": "conf-windows-base",
       "architecture": {
         "value": "x64",
         "strategy": "external"
       },
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      }
     },
     {
       "name": "x64-release",
       "displayName": "x64 Release",
       "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
       "inherits": "x64-debug",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
     },
     {
       "name": "x86-debug",
       "displayName": "x86 Debug",
       "description": "Target Windows (32-bit) with the Visual Studio development environment. (Debug)",
-      "inherits": "windows-base",
+      "inherits": "conf-windows-base",
       "architecture": {
         "value": "x86",
         "strategy": "external"
       },
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      }
     },
     {
       "name": "x86-release",
       "displayName": "x86 Release",
       "description": "Target Windows (32-bit) with the Visual Studio development environment. (RelWithDebInfo)",
       "inherits": "x86-debug",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-base",
+      "description": "Test CMake settings that apply to all configurations",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "gcc-debug",
+      "displayName": "Strict",
+      "description": "Enable output and stop on failure",
+      "inherits": "test-base",
+      "configurePreset": "gcc-debug"
     }
   ]
 }

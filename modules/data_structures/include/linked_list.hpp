@@ -14,8 +14,8 @@ class linked_list {
  public:
   linked_list() = default;
   linked_list(std::initializer_list<T> values);
-  linked_list(const linked_list<T>& list);
-  linked_list(const linked_list<T>&& list) noexcept;
+  linked_list(const linked_list<T>& other);
+  linked_list(linked_list<T>&& temp) noexcept;
   ~linked_list();
 
   [[nodiscard]] constexpr int size() const { return m_size_; }
@@ -35,8 +35,8 @@ class linked_list {
     return const_iterator{ nullptr };
   }
 
-  linked_list& operator=(linked_list list);
-  linked_list& operator=(linked_list&& list) noexcept;
+  linked_list& operator=(const linked_list& other);
+  linked_list& operator=(linked_list&& temp) noexcept;
   linked_list& operator=(std::initializer_list<T> values);
 
  private:
@@ -74,8 +74,11 @@ class linked_list {
     pointer_type m_ptr_;
   };
 
-  template<typename U>
-  friend void swap(linked_list<U>& left, linked_list<U>& right) noexcept;  // NOLINT(readability-redundant-declaration)
+  template <typename U>
+  friend void swap(
+      linked_list<U>& left,
+      linked_list<U>&
+          right) noexcept;  // NOLINT(readability-redundant-declaration)
 };
 
 template <typename T>
@@ -91,11 +94,9 @@ void swap(linked_list<T>& left, linked_list<T>& right) noexcept {
 
 // ############## linked_list ##############
 
-// ------- constructors -------
-
 template <typename T>
 ds::linked_list<T>::linked_list(std::initializer_list<T> values) {
-  std::cout << *this << " IL constructor " << std::endl;
+  std::cout << *this << " list constructor " << std::endl;
 
   for (const T& value : values) {
     add_last(value);
@@ -103,17 +104,19 @@ ds::linked_list<T>::linked_list(std::initializer_list<T> values) {
 }
 
 template <typename T>
-ds::linked_list<T>::linked_list(const ds::linked_list<T>& list) {
-  std::cout << list << " copy constructor" << std::endl;
+ds::linked_list<T>::linked_list(const ds::linked_list<T>& other) {
+  std::cout << other << " copy constructor" << std::endl;
 
-  for (const T& value : list) {
+  for (const T& value : other) {
     add_last(value);
   }
 }
 
 template <typename T>
-ds::linked_list<T>::linked_list(const ds::linked_list<T>&& list) noexcept {
-  std::cout << list << " move constructor" << std::endl;
+ds::linked_list<T>::linked_list(ds::linked_list<T>&& temp) noexcept {
+  std::cout << temp << " move constructor" << std::endl;
+
+  swap(*this, temp);
 }
 
 template <typename T>
@@ -127,13 +130,7 @@ ds::linked_list<T>::linked_list::~linked_list() {
     current = current->m_next;
     delete prev;
   }
-
-  m_size_ = 0;
-  m_first_ = nullptr;
-  m_last_ = nullptr;
 }
-
-// ------- methods -------
 
 template <typename T>
 typename ds::linked_list<T>::node& ds::linked_list<T>::add_first(T value) {
@@ -176,7 +173,7 @@ void ds::linked_list<T>::remove(node& to_remove) {
   if (m_size_ == 0) {
     return;
   }
-  
+
   if (&to_remove == m_first_) {
     remove_first();
   } else if (&to_remove == m_last_) {
@@ -231,8 +228,6 @@ void ds::linked_list<T>::remove_last() {
   --m_size_;
 }
 
-// -------  operators -------
-
 template <typename T>
 std::ostream& operator<<(std::ostream& out, const ds::linked_list<T>& list) {
   out << "linked_list(size=" << list.size() << ")";
@@ -240,22 +235,27 @@ std::ostream& operator<<(std::ostream& out, const ds::linked_list<T>& list) {
 }
 
 template <typename T>
-ds::linked_list<T>& ds::linked_list<T>::operator=(linked_list<T> list) {
-  swap(*this, list);
+ds::linked_list<T>& ds::linked_list<T>::operator=(const linked_list<T>& other) {
+  std::cout << other << " copy assignment" << std::endl;
+
+  linked_list<T> copy{ other };
+  swap(*this, copy);
   return *this;
 }
 
 template <typename T>
-ds::linked_list<T>& ds::linked_list<T>::operator=(linked_list&& list) noexcept {
-  //std::cout << list << " move assignment" << std::endl;
+ds::linked_list<T>& ds::linked_list<T>::operator=(
+    linked_list<T>&& temp) noexcept {
+  std::cout << temp << " move assignment" << std::endl;
 
+  swap(*this, temp);
   return *this;
 }
 
 template <typename T>
 ds::linked_list<T>& ds::linked_list<T>::operator=(
     std::initializer_list<T> values) {
-  std::cout << *this << " IL assignment" << std::endl;
+  std::cout << *this << " list assignment" << std::endl;
 
   for (T value : values) {
     add_first(value);
