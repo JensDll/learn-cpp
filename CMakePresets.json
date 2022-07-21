@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 3,
   "cmakeMinimumRequired": {
     "major": 3,
     "minor": 23,
@@ -45,7 +45,7 @@
       "condition": {
         "type": "inList",
         "string": "${hostSystemName}",
-        "list": ["Linux", "Darwin"]
+        "list": [ "Linux", "Darwin" ]
       },
       "vendor": {
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {

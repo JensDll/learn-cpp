@@ -6,83 +6,81 @@
 namespace ds {
 
 template <typename T>
-class linked_list {
+class LinkedList {
  private:
-  class node;
-  class const_iterator;
+  class Node;
+  class ConstIterator;
 
  public:
-  linked_list() = default;
-  linked_list(std::initializer_list<T> values);
-  linked_list(const linked_list<T>& other);
-  linked_list(linked_list<T>&& temp) noexcept;
-  ~linked_list();
+  LinkedList() = default;
+  LinkedList(std::initializer_list<T> values);
+  LinkedList(const LinkedList<T>& other);
+  LinkedList(LinkedList<T>&& temp) noexcept;
+  ~LinkedList();
 
   [[nodiscard]] constexpr int size() const { return m_size_; }
-  [[nodiscard]] constexpr node& first() const { return *m_first_; }
-  [[nodiscard]] constexpr node& last() const { return *m_last_; }
+  [[nodiscard]] constexpr Node& first() const { return *m_first_; }
+  [[nodiscard]] constexpr Node& last() const { return *m_last_; }
 
-  node& add_first(T value);
-  node& add_last(T value);
-  void remove(node& to_remove);
+  Node& add_first(T value);
+  Node& add_last(T value);
+  void remove(Node& node);
   void remove_first();
   void remove_last();
 
-  [[nodiscard]] constexpr const_iterator begin() const {
-    return const_iterator{ m_first_ };
+  [[nodiscard]] constexpr ConstIterator begin() const {
+    return ConstIterator{ m_first_ };
   }
-  [[nodiscard]] constexpr const_iterator end() const {
-    return const_iterator{ nullptr };
+  [[nodiscard]] constexpr ConstIterator end() const {
+    return ConstIterator{ nullptr };
   }
 
-  linked_list& operator=(const linked_list& other);
-  linked_list& operator=(linked_list&& temp) noexcept;
-  linked_list& operator=(std::initializer_list<T> values);
+  LinkedList& operator=(const LinkedList& other) noexcept;
+  LinkedList& operator=(LinkedList&& temp) noexcept;
+  LinkedList& operator=(std::initializer_list<T> values);
 
  private:
   int m_size_{ 0 };
-  node* m_first_{ nullptr };
-  node* m_last_{ nullptr };
+  Node* m_first_{ nullptr };
+  Node* m_last_{ nullptr };
 
-  class node {
+  class Node {
    public:
-    explicit node(T value);
+    explicit Node(T value);
 
     T m_value;
-    node* m_next{ nullptr };
-    node* m_prev{ nullptr };
+    Node* m_next{ nullptr };
+    Node* m_prev{ nullptr };
   };
 
-  class const_iterator {
+  class ConstIterator {
    public:
-    using value_type = T;
-    using pointer_type = const node*;
-    using reference_type = const value_type&;
-    using difference_type = int;
+    using ValueType = T;
+    using PointerType = const Node*;
+    using ReferenceType = const ValueType&;
+    using DifferenceType = int;
 
-    explicit const_iterator(pointer_type ptr);
+    explicit ConstIterator(PointerType ptr);
 
-    const_iterator& operator++();
-    const_iterator operator++(int);
-    const_iterator& operator--();
-    const_iterator operator--(int);
-    reference_type operator*() const;
-    bool operator==(const const_iterator& other) const;
-    bool operator!=(const const_iterator& other) const;
+    ConstIterator& operator++();
+    ConstIterator operator++(int);
+    ConstIterator& operator--();
+    ConstIterator operator--(int);
+    ReferenceType operator*() const;
+    bool operator==(const ConstIterator& other) const;
+    bool operator!=(const ConstIterator& other) const;
 
    private:
-    pointer_type m_ptr_;
+    PointerType m_ptr_;
   };
 
   template <typename U>
-  friend void swap(
-      linked_list<U>& left,
-      linked_list<U>&
-          right) noexcept;  // NOLINT(readability-redundant-declaration)
+  // NOLINTNEXTLINE(readability-redundant-declaration)
+  friend void swap(LinkedList<U>& left, LinkedList<U>& right) noexcept;
 };
 
-template <typename T>
-void swap(linked_list<T>& left, linked_list<T>& right) noexcept {
+template <typename U>
+void swap(LinkedList<U>& left, LinkedList<U>& right) noexcept {
   using std::swap;
 
   swap(left.m_size_, right.m_size_);
@@ -95,7 +93,7 @@ void swap(linked_list<T>& left, linked_list<T>& right) noexcept {
 // ############## linked_list ##############
 
 template <typename T>
-ds::linked_list<T>::linked_list(std::initializer_list<T> values) {
+ds::LinkedList<T>::LinkedList(std::initializer_list<T> values) {
   std::cout << *this << " list constructor " << std::endl;
 
   for (const T& value : values) {
@@ -104,7 +102,7 @@ ds::linked_list<T>::linked_list(std::initializer_list<T> values) {
 }
 
 template <typename T>
-ds::linked_list<T>::linked_list(const ds::linked_list<T>& other) {
+ds::LinkedList<T>::LinkedList(const ds::LinkedList<T>& other) {
   std::cout << other << " copy constructor" << std::endl;
 
   for (const T& value : other) {
@@ -113,28 +111,28 @@ ds::linked_list<T>::linked_list(const ds::linked_list<T>& other) {
 }
 
 template <typename T>
-ds::linked_list<T>::linked_list(ds::linked_list<T>&& temp) noexcept {
+ds::LinkedList<T>::LinkedList(ds::LinkedList<T>&& temp) noexcept {
   std::cout << temp << " move constructor" << std::endl;
 
   swap(*this, temp);
 }
 
 template <typename T>
-ds::linked_list<T>::linked_list::~linked_list() {
+ds::LinkedList<T>::LinkedList::~LinkedList() {
   std::cout << *this << " destructor " << std::endl;
 
-  node* current{ m_first_ };
+  Node* current{ m_first_ };
 
   while (current) {
-    const node* prev{ current };
+    const Node* prev{ current };
     current = current->m_next;
     delete prev;
   }
 }
 
 template <typename T>
-typename ds::linked_list<T>::node& ds::linked_list<T>::add_first(T value) {
-  node* new_node{ new node{ value } };
+typename ds::LinkedList<T>::Node& ds::LinkedList<T>::add_first(T value) {
+  Node* new_node{ new Node{ value } };
 
   if (m_size_ == 0) {
     m_first_ = new_node;
@@ -151,8 +149,8 @@ typename ds::linked_list<T>::node& ds::linked_list<T>::add_first(T value) {
 }
 
 template <typename T>
-typename ds::linked_list<T>::node& ds::linked_list<T>::add_last(T value) {
-  node* new_node{ new node{ value } };
+typename ds::LinkedList<T>::Node& ds::LinkedList<T>::add_last(T value) {
+  Node* new_node{ new Node{ value } };
 
   if (m_size_ == 0) {
     m_first_ = new_node;
@@ -169,30 +167,30 @@ typename ds::linked_list<T>::node& ds::linked_list<T>::add_last(T value) {
 }
 
 template <typename T>
-void ds::linked_list<T>::remove(node& to_remove) {
+void ds::LinkedList<T>::remove(Node& node) {
   if (m_size_ == 0) {
     return;
   }
 
-  if (&to_remove == m_first_) {
+  if (&node == m_first_) {
     remove_first();
-  } else if (&to_remove == m_last_) {
+  } else if (&node == m_last_) {
     remove_last();
   } else {
-    to_remove.m_prev->m_next = to_remove.m_next;
-    to_remove.m_next->m_prev = to_remove.m_prev;
-    delete &to_remove;
+    node.m_prev->m_next = node.m_next;
+    node.m_next->m_prev = node.m_prev;
+    delete &node;
     --m_size_;
   }
 }
 
 template <typename T>
-void ds::linked_list<T>::remove_first() {
+void ds::LinkedList<T>::remove_first() {
   if (m_size_ == 0) {
     return;
   }
 
-  const node* const first{ m_first_ };
+  const Node* const first{ m_first_ };
 
   if (m_size_ == 1) {
     m_first_ = nullptr;
@@ -208,12 +206,12 @@ void ds::linked_list<T>::remove_first() {
 }
 
 template <typename T>
-void ds::linked_list<T>::remove_last() {
+void ds::LinkedList<T>::remove_last() {
   if (m_size_ == 0) {
     return;
   }
 
-  const node* const last{ m_last_ };
+  const Node* const last{ m_last_ };
 
   if (m_size_ == 1) {
     m_first_ = nullptr;
@@ -229,23 +227,24 @@ void ds::linked_list<T>::remove_last() {
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& out, const ds::linked_list<T>& list) {
+std::ostream& operator<<(std::ostream& out, const ds::LinkedList<T>& list) {
   out << "linked_list(size=" << list.size() << ")";
   return out;
 }
 
 template <typename T>
-ds::linked_list<T>& ds::linked_list<T>::operator=(const linked_list<T>& other) {
+// NOLINTNEXTLINE(bugprone-unhandled-self-assignment)
+ds::LinkedList<T>& ds::LinkedList<T>::operator=(
+    const LinkedList<T>& other) noexcept {
   std::cout << other << " copy assignment" << std::endl;
 
-  linked_list<T> copy{ other };
+  LinkedList<T> copy{ other };
   swap(*this, copy);
   return *this;
 }
 
 template <typename T>
-ds::linked_list<T>& ds::linked_list<T>::operator=(
-    linked_list<T>&& temp) noexcept {
+ds::LinkedList<T>& ds::LinkedList<T>::operator=(LinkedList<T>&& temp) noexcept {
   std::cout << temp << " move assignment" << std::endl;
 
   swap(*this, temp);
@@ -253,7 +252,7 @@ ds::linked_list<T>& ds::linked_list<T>::operator=(
 }
 
 template <typename T>
-ds::linked_list<T>& ds::linked_list<T>::operator=(
+ds::LinkedList<T>& ds::LinkedList<T>::operator=(
     std::initializer_list<T> values) {
   std::cout << *this << " list assignment" << std::endl;
 
@@ -267,59 +266,59 @@ ds::linked_list<T>& ds::linked_list<T>::operator=(
 // ############## linked_list::node ##############
 
 template <typename T>
-ds::linked_list<T>::node::node(T value) : m_value{ std::move(value) } {}
+ds::LinkedList<T>::Node::Node(T value) : m_value{ std::move(value) } {}
 
 // ############## linked_list::const_iterator ##############
 
 template <typename T>
-ds::linked_list<T>::const_iterator::const_iterator(pointer_type ptr)
+ds::LinkedList<T>::ConstIterator::ConstIterator(PointerType ptr)
     : m_ptr_{ ptr } {}
 
 template <typename T>
-typename ds::linked_list<T>::const_iterator&
-ds::linked_list<T>::const_iterator::operator++() {
+typename ds::LinkedList<T>::ConstIterator&
+ds::LinkedList<T>::ConstIterator::operator++() {
   m_ptr_ = m_ptr_->m_next;
   return *this;
 }
 
 template <typename T>
-typename ds::linked_list<T>::const_iterator
-ds::linked_list<T>::const_iterator::operator++(int) {
-  const_iterator iter{ *this };
+typename ds::LinkedList<T>::ConstIterator
+ds::LinkedList<T>::ConstIterator::operator++(int) {
+  ConstIterator iter{ *this };
   ++(*this);
   return iter;
 }
 
 template <typename T>
-typename ds::linked_list<T>::const_iterator&
-ds::linked_list<T>::const_iterator::operator--() {
+typename ds::LinkedList<T>::ConstIterator&
+ds::LinkedList<T>::ConstIterator::operator--() {
   m_ptr_ = m_ptr_->m_prev;
   return *this;
 }
 
 template <typename T>
-typename ds::linked_list<T>::const_iterator
-ds::linked_list<T>::const_iterator::operator--(int) {
-  const_iterator iter{ *this };
+typename ds::LinkedList<T>::ConstIterator
+ds::LinkedList<T>::ConstIterator::operator--(int) {
+  ConstIterator iter{ *this };
   --(*this);
   return iter;
 }
 
 template <typename T>
-typename ds::linked_list<T>::const_iterator::reference_type
-ds::linked_list<T>::const_iterator::operator*() const {
+typename ds::LinkedList<T>::ConstIterator::ReferenceType
+ds::LinkedList<T>::ConstIterator::operator*() const {
   return m_ptr_->m_value;
 }
 
 template <typename T>
-bool ds::linked_list<T>::const_iterator::operator==(
-    const const_iterator& other) const {
+bool ds::LinkedList<T>::ConstIterator::operator==(
+    const ConstIterator& other) const {
   return m_ptr_ == other.m_ptr_;
 }
 
 template <typename T>
-bool ds::linked_list<T>::const_iterator::operator!=(
-    const const_iterator& other) const {
+bool ds::LinkedList<T>::ConstIterator::operator!=(
+    const ConstIterator& other) const {
   return !(*this == other);
 }
 
